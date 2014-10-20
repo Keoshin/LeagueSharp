@@ -6,6 +6,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using LX_Orbwalker;
 using Color = System.Drawing.Color;
 
 #endregion
@@ -15,9 +16,6 @@ namespace Syndra
     internal class Program
     {
         public const string ChampionName = "Syndra";
-
-        //Orbwalker instance
-        public static Orbwalking.Orbwalker Orbwalker;
 
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
@@ -74,16 +72,15 @@ namespace Syndra
             //Create the menu
             Config = new Menu(ChampionName, ChampionName, true);
 
-            //Orbwalker submenu
-            Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
-
             //Add the target selector to the menu as submenu.
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             SimpleTs.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
-            //Load the orbwalker and add it to the menu as submenu.
-            Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
+            //Orbwalker submenu
+            var orbwalkerMenu = new Menu("My Orbwalker", "my_Orbwalker");
+            LXOrbwalker.AddToMenu(orbwalkerMenu);
+            menu.AddSubMenu(orbwalkerMenu);
 
             //Combo menu:
             Config.AddSubMenu(new Menu("Combo", "Combo"));
@@ -159,7 +156,7 @@ namespace Syndra
                 Config.SubMenu("Misc")
                     .SubMenu("DontUlt")
                     .AddItem(new MenuItem("DontUlt" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
-            
+
             //Damage after combo:
             var dmgAfterComboItem =  new MenuItem("DamageAfterCombo", "Draw damage after combo").SetValue(true);
             Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
@@ -522,7 +519,7 @@ namespace Syndra
 
             //Update the R range
             R.Range = R.Level == 3 ? 750 : 675;
-           
+
             if (Config.Item("CastQE").GetValue<KeyBind>().Active && E.IsReady() && Q.IsReady())
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
                     if (enemy.IsValidTarget(EQ.Range) && Game.CursorPos.Distance(enemy.ServerPosition) < 300)
